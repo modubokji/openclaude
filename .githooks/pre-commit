@@ -1,0 +1,21 @@
+#!/bin/sh
+set -eu
+
+# GUI Git 클라이언트는 로그인 셸의 Homebrew PATH를 상속하지 않을 수 있다.
+if ! command -v gitleaks >/dev/null 2>&1; then
+  for tool_dir in /opt/homebrew/bin /usr/local/bin; do
+    if [ -x "$tool_dir/gitleaks" ]; then
+      PATH="$tool_dir:$PATH"
+      export PATH
+      break
+    fi
+  done
+fi
+
+if ! command -v gitleaks >/dev/null 2>&1; then
+  echo 'gitleaks가 없어 비밀값 검사를 실행할 수 없습니다. 설치 후 다시 커밋하세요.' >&2
+  echo 'macOS: brew install gitleaks' >&2
+  exit 1
+fi
+
+exec gitleaks git --pre-commit --staged --redact --no-banner -l warn

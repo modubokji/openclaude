@@ -1,0 +1,38 @@
+#!/bin/sh
+set -eu
+
+repo_root=$(git rev-parse --show-toplevel)
+cd "$repo_root"
+if [ -n "$(git config --get core.hooksPath || true)" ]; then
+  echo '기존 core.hooksPath를 보존합니다. 해당 pre-commit에서 .githooks/pre-commit을 연결하세요.' >&2
+  exit 1
+fi
+
+hooks_dir=$(git rev-parse --git-path hooks)
+mkdir -p "$hooks_dir"
+hook="$hooks_dir/pre-commit"
+previous="$hooks_dir/pre-commit.before-gitleaks"
+if [ -f "$hook" ] && ! grep -q '^# repository-gitleaks-hook$' "$hook"; then
+  if [ -e "$previous" ]; then
+    echo '기존 pre-commit 백업이 있어 덮어쓰지 않았습니다. 훅 구성을 먼저 확인하세요.' >&2
+    exit 1
+  fi
+  cp -p "$hook" "$previous"
+fi
+
+temporary=$(mktemp "$hooks_dir/pre-commit.XXXXXX")
+trap 'rm -f "$temporary"' EXIT HUP INT TERM
+cat > "$temporary" <<'HOOK'
+#!/bin/sh
+# repository-gitleaks-hook
+set -eu
+repo_root=$(git rev-parse --show-toplevel)
+previous=$(git rev-parse --git-path hooks/pre-commit.before-gitleaks)
+if [ -x "$previous" ]; then
+  "$previous" "$@"
+fi
+exec sh "$repo_root/.githooks/pre-commit"
+HOOK
+chmod 755 "$temporary"
+mv "$temporary" "$hook"
+echo 'gitleaks pre-commit을 연결했습니다. 기존 훅과 Entire 훅은 보존됩니다.'
