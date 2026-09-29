@@ -35,7 +35,8 @@
     "doctor:report": "bun run scripts/system-check.ts --out reports/doctor-runtime.json",
     "hardening:check": "bun run smoke && bun run doctor:runtime",
     "hardening:strict": "bun run typecheck && bun run hardening:check",
-    "prepack": "npm run build"
+    "prepack": "npm run build",
+    "knip": "knip"
   },
   "dependencies": {
     "@alcalzone/ansi-tokenize": "^0.3.0",
@@ -113,6 +114,7 @@
     "@types/bun": "^1.2.0",
     "@types/node": "^25.5.0",
     "@types/react": "^19.2.14",
+    "knip": "^6.38.0",
     "typescript": "^5.7.0"
   },
   "engines": {

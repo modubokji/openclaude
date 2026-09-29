@@ -1,0 +1,17 @@
+# 의존성 업데이트 PR 을 매주 자동으로 올린다. 보안 업데이트는 저장소 설정의 Dependabot security updates 를 따른다.
+version: 2
+updates:
+  - package-ecosystem: "bun"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "09:00"
+      timezone: "Asia/Seoul"
+    # 공개 직후의 악성·결함 릴리스를 피하려고 새 버전은 7일이 지난 뒤에 올린다.
+    cooldown:
+      default-days: 7
+    open-pull-requests-limit: 5
+    groups:
+      minor-and-patch:
+        update-types: ["minor", "patch"]
